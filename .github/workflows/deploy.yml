@@ -1,0 +1,27 @@
+name: Deploy Andhra Aqua Rates
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Deploy to VPS via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.LINODE_HOST }}
+          username: ${{ secrets.LINODE_USER }}
+          key: ${{ secrets.LINODE_SSH_KEY }}
+          script: |
+            cd /opt/AndhraAquaRates || cd /opt/andhraquarates || cd /opt/clickmart
+            git pull origin main
+            docker compose up --build -d
+            docker compose exec -T backend python manage.py migrate --noinput
+            docker compose exec -T backend python manage.py collectstatic --noinput

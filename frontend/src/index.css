@@ -1,0 +1,128 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    --primary: #0369a1;
+    --primary-dark: #075985;
+    --primary-light: #e0f2fe;
+    --accent: #0d9488;
+    --accent-light: #ccfbf1;
+    --bg-page: #f8fafc;
+    --bg-surface: #ffffff;
+    --text-main: #0f172a;
+    --text-muted: #64748b;
+    --border-color: #e2e8f0;
+  }
+
+  html, body {
+    overflow-x: hidden;
+    max-width: 100vw;
+    width: 100%;
+  }
+
+  body {
+    background-color: var(--bg-page);
+    color: var(--text-main);
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    margin: 0;
+    padding: 0;
+  }
+
+  #root {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+}
+
+/* Custom scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #f1f5f9;
+}
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* Animations */
+@keyframes pulseSubtle {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.85; transform: scale(1.02); }
+}
+
+.pulse-badge {
+  animation: pulseSubtle 3s infinite ease-in-out;
+}
+
+/* Clear harsh outlines on tap/click while preserving accessibility focus ring */
+a, button, input, select {
+  -webkit-tap-highlight-color: transparent;
+}
+
+a:focus, button:focus {
+  outline: none;
+}
+
+/* Bulletproof Form Input & Select Visibility & Contrast */
+select option {
+  background-color: #ffffff !important;
+  color: #0f172a !important;
+}
+
+input:not([class*="text-white"]):not([class*="text-slate-100"]):not([class*="text-slate-200"]),
+select:not([class*="text-white"]):not([class*="text-slate-100"]):not([class*="text-slate-200"]),
+textarea:not([class*="text-white"]):not([class*="text-slate-100"]):not([class*="text-slate-200"]) {
+  color: #0f172a !important;
+}
+
+input[type="date"] {
+  color: #0f172a !important;
+}
+
+input::placeholder, textarea::placeholder {
+  color: #94a3b8 !important;
+}
+
+/* Continuous Smooth Marquee Ticker */
+@keyframes marqueeScroll {
+  0% {
+    transform: translateX(0%);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+.animate-marquee {
+  display: flex;
+  width: max-content;
+  animation: marqueeScroll 45s linear infinite;
+  will-change: transform;
+}
+
+.animate-marquee:hover {
+  animation-play-state: paused;
+}
+
+.animate-marquee-slow {
+  display: flex;
+  width: max-content;
+  animation: marqueeScroll 85s linear infinite;
+  will-change: transform;
+}
+
+.animate-marquee-slow:hover {
+  animation-play-state: paused;
+}
+
+
+
+

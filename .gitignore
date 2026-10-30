@@ -1,0 +1,53 @@
+# Python & Virtual Environments
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+build/
+dist/
+wheels/
+*.egg-info/
+
+# Django
+*.log
+local_settings.py
+db.sqlite3
+db.sqlite3-journal
+backend/db.sqlite3
+backend/db.sqlite3-journal
+staticfiles/
+backend/staticfiles/
+media/
+backend/media/
+
+# Frontend
+node_modules/
+frontend/node_modules/
+frontend/dist/
+.npm
+.eslintcache
+*.tsbuildinfo
+
+# Environment & Secret files
+.env
+.env.production
+.env.docker
+backend/.env
+frontend/.env
+*.pem
+*.key
+certbot/
+
+# IDE & Editor
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+.DS_Store
+Thumbs.db
+.agents/
+.gemini/
