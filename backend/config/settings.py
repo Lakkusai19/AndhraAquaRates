@@ -22,7 +22,7 @@ DEBUG = os.getenv('DJANGO_DEBUG', 'True').lower() in ('true', '1', 'yes')
 
 ALLOWED_HOSTS = [
     host.strip()
-    for host in os.getenv('DJANGO_ALLOWED_HOSTS', 'localhost,127.0.0.1,0.0.0.0,testserver,backend,web').split(',')
+    for host in os.getenv('DJANGO_ALLOWED_HOSTS', 'localhost,127.0.0.1,0.0.0.0,testserver,backend,web,aquarates.online,.aquarates.online,172.232.87.138').split(',')
     if host.strip()
 ]
 
@@ -31,7 +31,7 @@ CSRF_TRUSTED_ORIGINS = [
     origin.strip()
     for origin in os.getenv(
         'DJANGO_CSRF_TRUSTED_ORIGINS',
-        'http://localhost:5173,http://127.0.0.1:5173,http://localhost:3000,http://localhost:80,http://127.0.0.1:80,http://localhost:8000,http://127.0.0.1:8000'
+        'https://aquarates.online,https://www.aquarates.online,http://aquarates.online,http://www.aquarates.online,http://localhost:5173,http://127.0.0.1:5173,http://localhost:3000,http://localhost:80,http://127.0.0.1:80,http://localhost:8000,http://127.0.0.1:8000,http://172.232.87.138'
     ).split(',')
     if origin.strip()
 ]
