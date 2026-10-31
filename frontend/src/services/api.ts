@@ -87,7 +87,12 @@ export const pricingApi = {
     fresh_only?: boolean;
     sort?: string;
     page?: number;
-  }) => apiClient.get<{ results: PublicComparisonItem[]; count: number }>('/prices/', { params }),
+    user_district?: string | number;
+    user_lat?: number;
+    user_lng?: number;
+    radius_km?: number | string;
+    all_ap?: boolean;
+  }) => apiClient.get<{ results: PublicComparisonItem[]; count: number; location_meta?: any }>('/prices/', { params }),
   
   getPriceSheetDetail: (id: number) => apiClient.get<any>(`/prices/${id}/`),
 };

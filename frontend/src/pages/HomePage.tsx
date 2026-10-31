@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useLanguage } from '../context/LanguageContext';
+import { useLocationPreference } from '../context/LocationContext';
 import { pricingApi, locationsApi, productsApi } from '../services/api';
 import { District, ShrimpCount, PublicComparisonItem } from '../types';
 import { AnimatedPrawnsBackground } from '../components/ui/AnimatedPrawnsBackground';
@@ -19,12 +20,14 @@ import {
   Award,
   Layers,
   Zap,
+  Navigation,
 } from 'lucide-react';
 import { FarmerInterestModal } from '../components/common/FarmerInterestModal';
 import { ImportantDisclaimerTicker } from '../components/common/ImportantDisclaimerTicker';
 
 export const HomePage: React.FC = () => {
   const { t, language } = useLanguage();
+  const { locationPreference, openLocationModal } = useLocationPreference();
   const navigate = useNavigate();
 
   const [districts, setDistricts] = useState<District[]>([]);
@@ -44,10 +47,18 @@ export const HomePage: React.FC = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
+        setLoading(true);
         const [distRes, countRes, priceRes] = await Promise.all([
           locationsApi.getDistricts(),
           productsApi.getCounts(),
-          pricingApi.getComparison({ sort: 'highest_price', page: 1 }),
+          pricingApi.getComparison({
+            sort: 'highest_price',
+            page: 1,
+            user_district: locationPreference.districtId,
+            user_lat: locationPreference.lat || undefined,
+            user_lng: locationPreference.lng || undefined,
+            radius_km: locationPreference.radiusKm || 300,
+          }),
         ]);
         setDistricts(distRes.data || []);
         setCounts(countRes.data || []);
@@ -67,7 +78,7 @@ export const HomePage: React.FC = () => {
       }
     };
     fetchData();
-  }, []);
+  }, [locationPreference.districtId, locationPreference.radiusKm, locationPreference.lat, locationPreference.lng]);
 
   const handleQuickSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -306,6 +317,37 @@ export const HomePage: React.FC = () => {
           </Link>
         </div>
 
+        {/* 300 km Surround Preference Banner */}
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 p-3.5 sm:p-4 rounded-2xl bg-gradient-to-r from-sky-950/70 via-slate-900 to-teal-950/70 border border-sky-400/30 mb-8 shadow-md">
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-xl bg-sky-500/20 text-sky-300 border border-sky-400/30 flex items-center justify-center shrink-0">
+              <MapPin className="w-4 h-4 text-teal-400" />
+            </div>
+            <div>
+              <div className="text-xs sm:text-sm font-extrabold text-white flex items-center gap-2 flex-wrap">
+                <span>{language === 'te' ? 'లొకేషన్ పరిధి ఫిల్టర్:' : 'Location Radius:'}</span>
+                <span className="text-sky-300 font-black">{locationPreference.districtName}</span>
+                <span className="text-[10px] px-2 py-0.5 rounded-full bg-teal-500/20 text-teal-300 border border-teal-400/30 font-bold">
+                  {locationPreference.radiusKm || 300} km {language === 'te' ? 'పరిధి' : 'surround'}
+                </span>
+              </div>
+              <p className="text-[11px] text-slate-400 mt-0.5">
+                {language === 'te'
+                  ? 'మీకు సమీపంలోని 300 కి.మీ లోపలి కొనుగోలుదారులు మరియు అత్యధిక ధరలు మాత్రమే చూపించబడుతున్నాయి.'
+                  : 'Showing verified buyers and highest purchasing rates within 300 km radius.'}
+              </p>
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={openLocationModal}
+            className="py-1.5 px-3.5 rounded-xl bg-sky-500/15 hover:bg-sky-500/25 text-sky-300 hover:text-white border border-sky-400/30 text-xs font-bold transition-all flex items-center gap-1.5 shrink-0 active:scale-95 cursor-pointer"
+          >
+            <MapPin className="w-3.5 h-3.5 text-teal-400" />
+            <span>{language === 'te' ? 'లొకేషన్ మార్చండి' : 'Change Location'}</span>
+          </button>
+        </div>
+
         {loading ? (
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 animate-pulse">
             {[1, 2, 3].map((n) => (
@@ -331,14 +373,20 @@ export const HomePage: React.FC = () => {
                 )}
 
                 <div>
-                  <div className="flex items-start justify-between mb-2">
+                  <div className="flex items-start justify-between mb-2 gap-2">
                     <div>
                       <h3 className="font-bold text-white text-base leading-snug">{item.buyer_name}</h3>
                       <div className="flex items-center gap-1.5 text-xs text-slate-400 mt-0.5">
-                        <MapPin className="w-3.5 h-3.5 text-sky-400" />
+                        <MapPin className="w-3.5 h-3.5 text-sky-400 shrink-0" />
                         <span>{item.market_name}, {item.district_name}</span>
                       </div>
                     </div>
+                    {item.distance_text && (
+                      <span className="inline-flex items-center gap-1 text-[10px] font-extrabold text-teal-300 bg-teal-500/15 border border-teal-400/30 px-2 py-0.5 rounded-full shrink-0">
+                        <Navigation className="w-2.5 h-2.5 fill-current" />
+                        {item.distance_text}
+                      </span>
+                    )}
                   </div>
 
                   {/* Price Banner */}

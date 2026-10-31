@@ -232,6 +232,35 @@ ALL_AP_DISTRICTS_DATA = [
     ),
 ]
 
+DISTRICT_COORDINATES = {
+    'Alluri Sitharama Raju': (18.0833, 82.6667),
+    'Anakapalli': (17.6896, 83.0033),
+    'Ananthapuramu': (14.6819, 77.6006),
+    'Annamayya': (14.0558, 78.7521),
+    'Bapatla': (15.9042, 80.4674),
+    'Chittoor': (13.2172, 79.1003),
+    'Dr. B. R. Ambedkar Konaseema': (16.5787, 82.0061),
+    'East Godavari': (17.0005, 81.8040),
+    'Eluru': (16.7107, 81.0952),
+    'Guntur': (16.3067, 80.4365),
+    'Kakinada': (16.9891, 82.2475),
+    'Krishna': (16.1809, 81.1303),
+    'Kurnool': (15.8281, 78.0373),
+    'Nandyal': (15.4886, 78.4836),
+    'Nellore': (14.4426, 79.9865),
+    'NTR (Vijayawada)': (16.5062, 80.6480),
+    'Palnadu': (16.2359, 80.0499),
+    'Parvathipuram Manyam': (18.7774, 83.4283),
+    'Prakasam': (15.5057, 80.0499),
+    'Sri Sathya Sai': (14.1678, 77.8116),
+    'Srikakulam': (18.2969, 83.8968),
+    'Tirupati': (13.6288, 79.4192),
+    'Visakhapatnam': (17.6868, 83.2185),
+    'Vizianagaram': (18.1124, 83.3956),
+    'West Godavari': (16.5449, 81.5212),
+    'YSR Kadapa': (14.4673, 78.8242),
+}
+
 class Command(BaseCommand):
     help = 'Seeds all 26 official districts of Andhra Pradesh with authentic aquaculture markets.'
 
@@ -247,13 +276,23 @@ class Command(BaseCommand):
         markets_created = 0
 
         for dist_name, markets in ALL_AP_DISTRICTS_DATA:
+            coords = DISTRICT_COORDINATES.get(dist_name, (None, None))
             dist, created = District.objects.get_or_create(
                 state=ap_state,
                 name=dist_name,
-                defaults={'is_active': True}
+                defaults={
+                    'is_active': True,
+                    'latitude': coords[0],
+                    'longitude': coords[1],
+                }
             )
             if created:
                 districts_created += 1
+            else:
+                if dist.latitude != coords[0] or dist.longitude != coords[1]:
+                    dist.latitude = coords[0]
+                    dist.longitude = coords[1]
+                    dist.save(update_fields=['latitude', 'longitude'])
 
             for m_name, l_type in markets:
                 _, m_created = MarketLocation.objects.get_or_create(

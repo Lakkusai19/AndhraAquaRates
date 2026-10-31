@@ -1,3 +1,4 @@
+import math
 from datetime import timedelta
 from decimal import Decimal
 from django.db import transaction
@@ -15,9 +16,24 @@ from .serializers import (
     PriceEntrySerializer
 )
 from apps.products.models import Product, ShrimpCount
-from apps.locations.models import MarketLocation
+from apps.locations.models import MarketLocation, District
 from apps.buyers.models import BuyerProfile
 from apps.audit.models import AuditLog
+
+def haversine_km(lat1, lon1, lat2, lon2):
+    """Calculate the great-circle distance between two points on Earth in kilometers."""
+    if lat1 is None or lon1 is None or lat2 is None or lon2 is None:
+        return None
+    try:
+        lat1, lon1, lat2, lon2 = float(lat1), float(lon1), float(lat2), float(lon2)
+        R = 6371.0  # Earth radius in kilometers
+        dlat = math.radians(lat2 - lat1)
+        dlon = math.radians(lon2 - lon1)
+        a = math.sin(dlat / 2)**2 + math.cos(math.radians(lat1)) * math.cos(math.radians(lat2)) * math.sin(dlon / 2)**2
+        c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
+        return round(R * c, 1)
+    except Exception:
+        return None
 
 class StandardResultsSetPagination(PageNumberPagination):
     page_size = 20
@@ -30,6 +46,7 @@ class PublicPriceComparisonView(APIView):
     Public comparison engine for shrimp farmers.
     Requires no login, registration or fee.
     Returns count-wise purchasing rates from subscribed verified buyers.
+    Supports location preferences and 300 km radius filtering for farmers.
     """
     permission_classes = [permissions.AllowAny]
 
@@ -38,7 +55,7 @@ class PublicPriceComparisonView(APIView):
         freshness_threshold = timezone.now() - timedelta(hours=24)
 
         # 1. Base query: Published sheets from verified buyers with an ACTIVE subscription
-        entries = PriceEntry.objects.filter(
+        entries_qs = PriceEntry.objects.filter(
             price_sheet__status='PUBLISHED',
             price_sheet__buyer__verification_status='VERIFIED',
             price_sheet__buyer__subscriptions__status='ACTIVE',
@@ -57,73 +74,191 @@ class PublicPriceComparisonView(APIView):
 
         # 2. Filtering
         district_param = request.query_params.get('district')
+        is_explicit_district_search = False
         if district_param:
+            is_explicit_district_search = True
             if district_param.isdigit():
-                entries = entries.filter(price_sheet__market_location__district_id=int(district_param))
+                entries_qs = entries_qs.filter(price_sheet__market_location__district_id=int(district_param))
             else:
-                entries = entries.filter(price_sheet__market_location__district__name__icontains=district_param)
+                entries_qs = entries_qs.filter(price_sheet__market_location__district__name__icontains=district_param)
 
         market_param = request.query_params.get('market')
         if market_param:
             if market_param.isdigit():
-                entries = entries.filter(price_sheet__market_location_id=int(market_param))
+                entries_qs = entries_qs.filter(price_sheet__market_location_id=int(market_param))
             else:
-                entries = entries.filter(price_sheet__market_location__name__icontains=market_param)
+                entries_qs = entries_qs.filter(price_sheet__market_location__name__icontains=market_param)
 
         count_param = request.query_params.get('count')
         if count_param and count_param.isdigit():
-            entries = entries.filter(shrimp_count__count_value=int(count_param))
+            entries_qs = entries_qs.filter(shrimp_count__count_value=int(count_param))
 
         min_price = request.query_params.get('min_price')
         if min_price:
             try:
-                entries = entries.filter(price_per_kg__gte=Decimal(min_price))
+                entries_qs = entries_qs.filter(price_per_kg__gte=Decimal(min_price))
             except Exception:
                 pass
 
         max_price = request.query_params.get('max_price')
         if max_price:
             try:
-                entries = entries.filter(price_per_kg__lte=Decimal(max_price))
+                entries_qs = entries_qs.filter(price_per_kg__lte=Decimal(max_price))
             except Exception:
                 pass
 
         buyer_search = request.query_params.get('buyer')
         if buyer_search:
-            entries = entries.filter(price_sheet__buyer__business_name__icontains=buyer_search)
+            entries_qs = entries_qs.filter(price_sheet__buyer__business_name__icontains=buyer_search)
 
         fresh_only = request.query_params.get('fresh_only')
         if fresh_only and fresh_only.lower() in ('true', '1', 'yes'):
-            entries = entries.filter(price_sheet__updated_at__gte=freshness_threshold)
+            entries_qs = entries_qs.filter(price_sheet__updated_at__gte=freshness_threshold)
 
-        # 3. Sorting
+        # 3. Location Preference & 300 km Surround Calculation
+        seller_lat = None
+        seller_lng = None
+        seller_district_obj = None
+
+        user_lat_param = request.query_params.get('user_lat')
+        user_lng_param = request.query_params.get('user_lng')
+        user_district_param = request.query_params.get('user_district')
+
+        if user_lat_param and user_lng_param:
+            try:
+                seller_lat = float(user_lat_param)
+                seller_lng = float(user_lng_param)
+            except (ValueError, TypeError):
+                seller_lat, seller_lng = None, None
+
+        if seller_lat is None and user_district_param:
+            if str(user_district_param).isdigit():
+                seller_district_obj = District.objects.filter(id=int(user_district_param)).first()
+            else:
+                seller_district_obj = District.objects.filter(name__iexact=str(user_district_param).strip()).first()
+            if seller_district_obj:
+                seller_lat = seller_district_obj.latitude
+                seller_lng = seller_district_obj.longitude
+
+        # If user coordinates are provided but no district, find closest district
+        if seller_district_obj is None and seller_lat is not None and seller_lng is not None:
+            all_dists = list(District.objects.all())
+            closest_d = None
+            min_d = float('inf')
+            for d in all_dists:
+                if d.latitude is not None and d.longitude is not None:
+                    dist_val = haversine_km(seller_lat, seller_lng, d.latitude, d.longitude)
+                    if dist_val is not None and dist_val < min_d:
+                        min_d = dist_val
+                        closest_d = d
+            seller_district_obj = closest_d
+
+        # Radius configuration
+        all_ap_param = request.query_params.get('all_ap')
+        is_all_ap = all_ap_param and all_ap_param.lower() in ('true', '1', 'yes')
+
+        radius_km = 300.0
+        radius_param = request.query_params.get('radius_km')
+        if radius_param:
+            if str(radius_param).lower() in ('all', 'none', 'false', '0'):
+                radius_km = None
+            else:
+                try:
+                    radius_km = float(radius_param)
+                except (ValueError, TypeError):
+                    radius_km = 300.0
+
+        # Cache all district coordinates for fast lookups
+        district_coords = {d.id: (d.latitude, d.longitude) for d in District.objects.all()}
+
+        # Evaluate queryset to list
+        entries_list = list(entries_qs)
+
+        # Compute distance for each entry
+        entry_distance_map = {}
+        for entry in entries_list:
+            loc = entry.price_sheet.market_location
+            m_lat = loc.latitude
+            m_lng = loc.longitude
+            if m_lat is None or m_lng is None:
+                d_coords = district_coords.get(loc.district_id, (None, None))
+                m_lat, m_lng = d_coords[0], d_coords[1]
+            if (m_lat is None or m_lng is None) and entry.price_sheet.buyer.district_id:
+                b_coords = district_coords.get(entry.price_sheet.buyer.district_id, (None, None))
+                m_lat, m_lng = b_coords[0], b_coords[1]
+
+            if seller_lat is not None and seller_lng is not None and m_lat is not None and m_lng is not None:
+                d_km = haversine_km(seller_lat, seller_lng, m_lat, m_lng)
+            else:
+                d_km = None
+            entry_distance_map[entry.id] = d_km
+
+        # Filter by 300 km radius:
+        # If user explicitly searched a district ("different district wise search search chesthe no issues"),
+        # or requested all_ap, DO NOT restrict to 300 km.
+        # Otherwise, if seller location is present and radius_km is specified, strictly filter by radius!
+        should_filter_radius = (
+            not is_explicit_district_search
+            and not is_all_ap
+            and radius_km is not None
+            and seller_lat is not None
+            and seller_lng is not None
+        )
+
+        if should_filter_radius:
+            filtered_entries = [
+                e for e in entries_list
+                if entry_distance_map.get(e.id) is not None and entry_distance_map.get(e.id) <= radius_km
+            ]
+        else:
+            filtered_entries = entries_list
+
+        # Highest price is computed strictly from the filtered set
+        # ("starting lo high price anedhi 300km radious lo buyers deatils maathrame chupinchali")
+        highest_rate = max((e.price_per_kg for e in filtered_entries), default=None)
+
+        # Sorting
         sort_param = request.query_params.get('sort', 'highest_price')
         if sort_param == 'highest_price':
-            entries = entries.order_by('-price_per_kg', '-price_sheet__updated_at')
+            filtered_entries.sort(
+                key=lambda e: (-e.price_per_kg, entry_distance_map.get(e.id) or 99999, -e.price_sheet.updated_at.timestamp())
+            )
         elif sort_param == 'lowest_price':
-            entries = entries.order_by('price_per_kg', '-price_sheet__updated_at')
+            filtered_entries.sort(
+                key=lambda e: (e.price_per_kg, -e.price_sheet.updated_at.timestamp())
+            )
+        elif sort_param in ('nearest_first', 'distance_asc'):
+            filtered_entries.sort(
+                key=lambda e: (entry_distance_map.get(e.id) or 99999, -e.price_per_kg)
+            )
         elif sort_param == 'recently_updated':
-            entries = entries.order_by('-price_sheet__updated_at', '-price_per_kg')
+            filtered_entries.sort(
+                key=lambda e: (-e.price_sheet.updated_at.timestamp(), -e.price_per_kg)
+            )
         elif sort_param == 'oldest_update':
-            entries = entries.order_by('price_sheet__updated_at', '-price_per_kg')
+            filtered_entries.sort(
+                key=lambda e: (e.price_sheet.updated_at.timestamp(), -e.price_per_kg)
+            )
         elif sort_param == 'location_asc':
-            entries = entries.order_by('price_sheet__market_location__district__name', 'price_sheet__market_location__name')
+            filtered_entries.sort(
+                key=lambda e: (e.price_sheet.market_location.district.name, e.price_sheet.market_location.name)
+            )
         else:
-            entries = entries.order_by('-price_per_kg', '-price_sheet__updated_at')
+            filtered_entries.sort(
+                key=lambda e: (-e.price_per_kg, entry_distance_map.get(e.id) or 99999, -e.price_sheet.updated_at.timestamp())
+            )
 
-        # Find highest price in the currently filtered result set
-        highest_rate = entries.aggregate(max_rate=Max('price_per_kg'))['max_rate']
-
-        # 4. Pagination
+        # Pagination
         paginator = StandardResultsSetPagination()
-        page = paginator.paginate_queryset(entries, request)
+        page = paginator.paginate_queryset(filtered_entries, request)
 
         results = []
-        for entry in (page if page is not None else entries):
+        for entry in (page if page is not None else filtered_entries):
             buyer = entry.price_sheet.buyer
             loc = entry.price_sheet.market_location
             is_fresh = (now - entry.price_sheet.updated_at) <= timedelta(hours=24)
             is_highest = (highest_rate is not None and entry.price_per_kg == highest_rate)
+            dist_km = entry_distance_map.get(entry.id)
 
             results.append({
                 'sheet_id': entry.price_sheet.id,
@@ -138,12 +273,16 @@ class PublicPriceComparisonView(APIView):
                 'unit': entry.price_sheet.product.default_price_unit,
                 'state_name': loc.district.state.name,
                 'district_name': loc.district.name,
+                'district_id': loc.district.id,
                 'market_name': loc.name,
                 'price_date': entry.price_sheet.price_date,
                 'updated_at': entry.price_sheet.updated_at,
                 'is_fresh': is_fresh,
                 'freshness_status': 'Fresh Today' if is_fresh else 'Stale / Needs Verification',
                 'is_highest': is_highest,
+                'distance_km': dist_km,
+                'distance_text': f"{int(round(dist_km))} km away" if dist_km is not None else None,
+                'within_radius': (dist_km <= (radius_km or 300)) if dist_km is not None else True,
                 'tel_link': buyer.formatted_tel_link,
                 'whatsapp_link': buyer.get_whatsapp_chat_link(
                     shrimp_count=entry.shrimp_count.count_value,
@@ -155,9 +294,22 @@ class PublicPriceComparisonView(APIView):
                 'is_featured': buyer.is_featured,
             })
 
+        meta = {
+            'preferred_location': {
+                'district_id': seller_district_obj.id if seller_district_obj else None,
+                'district_name': seller_district_obj.name if seller_district_obj else None,
+                'latitude': seller_lat,
+                'longitude': seller_lng,
+                'radius_km': radius_km if should_filter_radius else None,
+                'is_radius_filtered': should_filter_radius,
+            }
+        }
+
         if page is not None:
-            return paginator.get_paginated_response(results)
-        return Response({'results': results, 'count': len(results)})
+            response = paginator.get_paginated_response(results)
+            response.data['location_meta'] = meta['preferred_location']
+            return response
+        return Response({'results': results, 'count': len(results), 'location_meta': meta['preferred_location']})
 
 
 class PublicPriceSheetDetailView(APIView):

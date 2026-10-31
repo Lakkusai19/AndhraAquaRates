@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { useLanguage } from '../../context/LanguageContext';
+import { useLocationPreference } from '../../context/LocationContext';
 import {
   Scale,
   MapPin,
@@ -24,6 +25,7 @@ export const Navbar: React.FC = () => {
   const navigate = useNavigate();
   const { user, isAuthenticated, isBuyer, isAdmin, hasActiveSubscription, logout } = useAuth();
   const { language, setLanguage, t } = useLanguage();
+  const { locationPreference, openLocationModal } = useLocationPreference();
 
   const isActive = (path: string) => location.pathname === path;
 
@@ -136,9 +138,23 @@ export const Navbar: React.FC = () => {
             </Link>
           </nav>
 
-          {/* 3. RIGHT ACTIONS: Language, Buyer & Auth (whitespace-nowrap & shrink-0) */}
-          <div className="hidden md:flex items-center space-x-3 shrink-0">
+          {/* 3. RIGHT ACTIONS: Location, Language, Buyer & Auth (whitespace-nowrap & shrink-0) */}
+          <div className="hidden md:flex items-center space-x-2.5 shrink-0">
             
+            {/* Location Preference Pill (300 km radius) */}
+            <button
+              type="button"
+              onClick={openLocationModal}
+              title={language === 'te' ? 'లొకేషన్ ప్రాధాన్యత మార్చండి (300 కి.మీ పరిధి)' : 'Change Location Preference (300 km surround)'}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-slate-900/90 hover:bg-slate-800 text-sky-300 hover:text-white border border-sky-400/35 hover:border-teal-400 text-xs font-bold transition-all shadow-sm group cursor-pointer shrink-0 active:scale-95"
+            >
+              <MapPin className="w-3.5 h-3.5 text-teal-400 group-hover:scale-110 transition-transform shrink-0" />
+              <span className="truncate max-w-[120px]">{locationPreference.districtName}</span>
+              <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-sky-500/20 text-sky-300 border border-sky-400/30 font-semibold shrink-0">
+                {locationPreference.radiusKm || 300}km
+              </span>
+            </button>
+
             {/* Language Switcher Pill */}
             <div className="flex items-center bg-slate-900/90 rounded-full p-1 border border-slate-700/80 shrink-0">
               <button
@@ -307,6 +323,34 @@ export const Navbar: React.FC = () => {
               <div className="text-[10px] text-sky-300 font-medium leading-tight mt-0.5">ఆంధ్ర ఆక్వా రేట్స్</div>
             </div>
           </div>
+
+          {/* Location Preference Tile (Mobile) */}
+          <button
+            type="button"
+            onClick={() => {
+              setIsOpen(false);
+              openLocationModal();
+            }}
+            className="w-full p-2.5 rounded-2xl bg-gradient-to-r from-sky-950/60 to-slate-900 border border-sky-400/30 flex items-center justify-between text-xs font-bold text-sky-300 active:scale-98 transition-all"
+          >
+            <div className="flex items-center gap-2">
+              <MapPin className="w-4 h-4 text-teal-400 shrink-0" />
+              <div className="text-left">
+                <span className="text-[10px] text-slate-400 block font-normal leading-tight">
+                  {language === 'te' ? 'లొకేషన్ ప్రాధాన్యత' : 'Location Preference'}
+                </span>
+                <span className="text-white font-extrabold">{locationPreference.districtName}</span>
+              </div>
+            </div>
+            <div className="flex items-center gap-1.5">
+              <span className="text-[10px] px-2 py-0.5 rounded-full bg-sky-500/20 text-sky-300 border border-sky-400/30">
+                {locationPreference.radiusKm || 300} km
+              </span>
+              <span className="text-xs text-teal-400 font-bold underline">
+                {language === 'te' ? 'మార్చండి' : 'Change'}
+              </span>
+            </div>
+          </button>
 
           <Link
             to="/"

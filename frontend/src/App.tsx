@@ -2,8 +2,10 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { LanguageProvider } from './context/LanguageContext';
+import { LocationProvider } from './context/LocationContext';
 
 import { ErrorBoundary } from './components/common/ErrorBoundary';
+import { LocationPreferenceModal } from './components/common/LocationPreferenceModal';
 
 // Layout
 import { Navbar } from './components/layout/Navbar';
@@ -58,12 +60,14 @@ export default function App() {
   return (
     <ErrorBoundary>
       <LanguageProvider>
-        <AuthProvider>
-          <Router>
-            <div className="flex flex-col min-h-screen bg-slate-900 font-sans overflow-x-hidden w-full max-w-full">
-              <Navbar />
-              <main className="flex-1 flex flex-col w-full max-w-full overflow-x-hidden">
-                <Routes>
+        <LocationProvider>
+          <AuthProvider>
+            <Router>
+              <div className="flex flex-col min-h-screen bg-slate-900 font-sans overflow-x-hidden w-full max-w-full">
+                <LocationPreferenceModal />
+                <Navbar />
+                <main className="flex-1 flex flex-col w-full max-w-full overflow-x-hidden">
+                  <Routes>
                   {/* Public Farmer Routes */}
                   <Route path="/" element={<HomePage />} />
                   <Route path="/compare" element={<ComparePricesPage />} />
@@ -127,7 +131,8 @@ export default function App() {
             </div>
           </Router>
         </AuthProvider>
-      </LanguageProvider>
-    </ErrorBoundary>
-  );
+      </LocationProvider>
+    </LanguageProvider>
+  </ErrorBoundary>
+);
 }

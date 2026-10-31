@@ -12,7 +12,7 @@ class DistrictSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = District
-        fields = ['id', 'state', 'state_name', 'state_code', 'name', 'is_active']
+        fields = ['id', 'state', 'state_name', 'state_code', 'name', 'latitude', 'longitude', 'is_active']
 
 class MarketLocationSerializer(serializers.ModelSerializer):
     district_name = serializers.ReadOnlyField(source='district.name')
@@ -20,4 +20,4 @@ class MarketLocationSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = MarketLocation
-        fields = ['id', 'district', 'district_name', 'state_name', 'name', 'location_type', 'is_active']
+        fields = ['id', 'district', 'district_name', 'state_name', 'name', 'location_type', 'latitude', 'longitude', 'is_active']

@@ -29,6 +29,8 @@ export interface District {
   state_name: string;
   state_code: string;
   name: string;
+  latitude?: number;
+  longitude?: number;
   is_active: boolean;
 }
 
@@ -39,6 +41,8 @@ export interface MarketLocation {
   state_name: string;
   name: string;
   location_type: string;
+  latitude?: number;
+  longitude?: number;
   is_active: boolean;
 }
 
@@ -75,18 +79,31 @@ export interface PublicComparisonItem {
   unit: string;
   state_name: string;
   district_name: string;
+  district_id?: number;
   market_name: string;
   price_date: string;
   updated_at: string;
   is_fresh: boolean;
   freshness_status: string;
   is_highest: boolean;
+  distance_km?: number | null;
+  distance_text?: string | null;
+  within_radius?: boolean;
   tel_link: string;
   whatsapp_link: string;
   payment_terms?: string;
   buyer_note: string;
   quantity_capacity: string;
   is_featured: boolean;
+}
+
+export interface LocationPreference {
+  districtId: number;
+  districtName: string;
+  lat: number | null;
+  lng: number | null;
+  radiusKm: number;
+  isAutoDetected?: boolean;
 }
 
 export interface SubscriptionPlan {

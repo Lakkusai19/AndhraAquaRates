@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useLanguage } from '../context/LanguageContext';
 import { useAuth } from '../context/AuthContext';
+import { useLocationPreference } from '../context/LocationContext';
 import { pricingApi, locationsApi, productsApi, buyerApi } from '../services/api';
 import { District, ShrimpCount, PublicComparisonItem } from '../types';
 import { AnimatedPrawnsBackground } from '../components/ui/AnimatedPrawnsBackground';
@@ -33,12 +34,14 @@ import {
   ShieldCheck,
   Zap,
   CreditCard,
-  X
+  X,
+  Navigation,
 } from 'lucide-react';
 
 export const ComparePricesPage: React.FC = () => {
   const { t, language } = useLanguage();
   const { user, isBuyer } = useAuth();
+  const { locationPreference, openLocationModal } = useLocationPreference();
   const [searchParams, setSearchParams] = useSearchParams();
 
   const [deleteTargetItem, setDeleteTargetItem] = useState<PublicComparisonItem | null>(null);
@@ -47,6 +50,7 @@ export const ComparePricesPage: React.FC = () => {
 
   // Filter state initialized from URL search params
   const [district, setDistrict] = useState<string>(searchParams.get('district') || '');
+  const [isAllAp, setIsAllAp] = useState<boolean>(searchParams.get('all_ap') === 'true');
   const [count, setCount] = useState<string>(searchParams.get('count') || '');
   const [minPrice, setMinPrice] = useState<string>(searchParams.get('min_price') || '');
   const [maxPrice, setMaxPrice] = useState<string>(searchParams.get('max_price') || '');
@@ -94,6 +98,7 @@ export const ComparePricesPage: React.FC = () => {
     // Sync URL search parameters
     const params: any = {};
     if (district) params.district = district;
+    if (isAllAp) params.all_ap = 'true';
     if (count) params.count = count;
     if (minPrice) params.min_price = minPrice;
     if (maxPrice) params.max_price = maxPrice;
@@ -105,8 +110,12 @@ export const ComparePricesPage: React.FC = () => {
     setSearchParams(params);
 
     try {
-      const res = await pricingApi.getComparison({
+      // Pass location preference:
+      // When no specific district is searched and not all_ap, enforce 300km radius!
+      // When specific district is searched, pass seller coordinates for distance calculation without 300km block!
+      const queryParams: any = {
         district: district || undefined,
+        all_ap: isAllAp ? true : undefined,
         count: count ? Number(count) : undefined,
         min_price: minPrice ? Number(minPrice) : undefined,
         max_price: maxPrice ? Number(maxPrice) : undefined,
@@ -114,7 +123,16 @@ export const ComparePricesPage: React.FC = () => {
         fresh_only: freshOnly || undefined,
         sort: sort || 'highest_price',
         page: page,
-      });
+        user_district: locationPreference.districtId,
+        user_lat: locationPreference.lat || undefined,
+        user_lng: locationPreference.lng || undefined,
+      };
+
+      if (!district && !isAllAp) {
+        queryParams.radius_km = locationPreference.radiusKm || 300;
+      }
+
+      const res = await pricingApi.getComparison(queryParams);
       setItems(res.data.results || []);
       setTotalCount(res.data.count || 0);
     } catch (err: any) {
@@ -127,15 +145,32 @@ export const ComparePricesPage: React.FC = () => {
 
   useEffect(() => {
     fetchPrices();
-  }, [district, count, minPrice, maxPrice, buyerSearch, freshOnly, sort, page]);
+  }, [
+    district,
+    isAllAp,
+    count,
+    minPrice,
+    maxPrice,
+    buyerSearch,
+    freshOnly,
+    sort,
+    page,
+    locationPreference.districtId,
+    locationPreference.radiusKm,
+    locationPreference.lat,
+    locationPreference.lng,
+  ]);
 
   const handleResetFilters = () => {
     setDistrict('');
+    setIsAllAp(false);
     setCount('');
     setMinPrice('');
     setMaxPrice('');
     setBuyerSearch('');
     setFreshOnly(false);
+    setSort('highest_price');
+    setPage(1);
     setSort('highest_price');
     setPage(1);
   };
@@ -517,6 +552,7 @@ export const ComparePricesPage: React.FC = () => {
                 className="text-xs font-semibold rounded-xl border border-sky-500/30 bg-slate-950/80 hover:border-sky-400 py-2 px-3 text-white focus:outline-none focus:ring-2 focus:ring-sky-400 shadow-inner"
               >
                 <option value="highest_price" className="bg-slate-900 text-white">{t.highestPriceFirst}</option>
+                <option value="nearest_first" className="bg-slate-900 text-white">{t.nearestFirst || 'Nearest Buyers First'}</option>
                 <option value="lowest_price" className="bg-slate-900 text-white">{t.lowestPriceFirst}</option>
                 <option value="recently_updated" className="bg-slate-900 text-white">{t.recentlyUpdated}</option>
                 <option value="oldest_update" className="bg-slate-900 text-white">{t.oldestUpdate}</option>
@@ -537,6 +573,105 @@ export const ComparePricesPage: React.FC = () => {
           {/* Important Disclaimer Scrolling Ticker */}
           <div className="mb-4">
             <ImportantDisclaimerTicker />
+          </div>
+
+          {/* Location Scope & 300 km Surround Banner */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3.5 sm:p-4 rounded-2xl bg-gradient-to-r from-sky-950/80 via-slate-900 to-teal-950/80 border border-sky-400/30 mb-5 shadow-lg">
+            <div className="flex items-center gap-3">
+              <div className="w-9 h-9 rounded-xl bg-sky-500/20 text-teal-300 border border-sky-400/30 flex items-center justify-center shrink-0">
+                <MapPin className="w-4 h-4 text-teal-400" />
+              </div>
+              <div>
+                <div className="text-xs sm:text-sm font-extrabold text-white flex items-center gap-2 flex-wrap">
+                  <span>{language === 'te' ? 'లొకేషన్ పరిధి:' : 'Location Scope:'}</span>
+                  {district ? (
+                    <span className="text-amber-300 font-black">
+                      {districtsList.find((d) => String(d.id) === String(district))?.name || district} (
+                      {language === 'te' ? 'జిల్లా శోధన' : 'District Search'})
+                    </span>
+                  ) : isAllAp ? (
+                    <span className="text-sky-300 font-black">
+                      {language === 'te' ? 'మొత్తం ఆంధ్రప్రదేశ్ (26 జిల్లాలు)' : 'All Andhra Pradesh (26 Districts)'}
+                    </span>
+                  ) : (
+                    <>
+                      <span className="text-sky-300 font-black">{locationPreference.districtName}</span>
+                      <span className="text-[10px] px-2 py-0.5 rounded-full bg-teal-500/20 text-teal-300 border border-teal-400/30 font-bold">
+                        {locationPreference.radiusKm || 300} km surround
+                      </span>
+                    </>
+                  )}
+                </div>
+                <p className="text-[11px] text-slate-400 mt-0.5">
+                  {district
+                    ? (language === 'te'
+                        ? 'ఎంచుకున్న జిల్లాలోని కొనుగోలుదారులు చూపబడుతున్నారు. మీ లొకేషన్ నుండి దూరం కూడా కనిపిస్తుంది.'
+                        : 'Showing rates for selected district with distance from your preferred location.')
+                    : isAllAp
+                    ? (language === 'te'
+                        ? 'ఆంధ్రప్రదేశ్‌లోని అన్ని జిల్లాల కొనుగోలుదారుల రేట్లు చూపబడుతున్నాయి.'
+                        : 'Showing prices from buyers across all Andhra Pradesh districts.')
+                    : (language === 'te'
+                        ? `మీకు సమీపంలోని 300 కి.మీ పరిధిలోని కొనుగోలుదారులు మరియు వారిలో అత్యధిక ధర ఇచ్చే టాప్ రేట్ చూపబడుతున్నాయి.`
+                        : `Showing verified buyers and highest purchasing rates within 300 km.`)}
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap">
+              {!district && (
+                <div className="flex items-center bg-slate-950 p-1 rounded-xl border border-slate-700/80">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsAllAp(false);
+                      setPage(1);
+                    }}
+                    className={`px-3 py-1 rounded-lg text-xs font-bold transition-all ${
+                      !isAllAp ? 'bg-sky-500 text-slate-950 shadow-sm font-black' : 'text-slate-400 hover:text-white'
+                    }`}
+                  >
+                    {language === 'te' ? '300 కి.మీ పరిధి' : '300 km Surround'}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsAllAp(true);
+                      setPage(1);
+                    }}
+                    className={`px-3 py-1 rounded-lg text-xs font-bold transition-all ${
+                      isAllAp ? 'bg-sky-500 text-slate-950 shadow-sm font-black' : 'text-slate-400 hover:text-white'
+                    }`}
+                  >
+                    {language === 'te' ? 'మొత్తం AP' : 'All AP'}
+                  </button>
+                </div>
+              )}
+
+              {district && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setDistrict('');
+                    setIsAllAp(false);
+                    setPage(1);
+                  }}
+                  className="py-1.5 px-3 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-400/40 text-xs font-bold transition-all flex items-center gap-1 shrink-0"
+                >
+                  <RotateCcw className="w-3.5 h-3.5" />
+                  <span>{language === 'te' ? '300 కి.మీ పరిధికి తిరిగి వెళ్లండి' : 'Back to 300 km Surround'}</span>
+                </button>
+              )}
+
+              <button
+                type="button"
+                onClick={openLocationModal}
+                className="py-1.5 px-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-sky-300 hover:text-white border border-sky-400/30 text-xs font-bold transition-all flex items-center gap-1.5 shrink-0 active:scale-95 cursor-pointer"
+              >
+                <MapPin className="w-3.5 h-3.5 text-teal-400" />
+                <span>{language === 'te' ? 'లొకేషన్ మార్చండి' : 'Change Location'}</span>
+              </button>
+            </div>
           </div>
 
           {/* Results Status Banner */}
@@ -726,7 +861,15 @@ export const ComparePricesPage: React.FC = () => {
                               <MapPin className="w-3.5 h-3.5 text-sky-400 shrink-0" />
                               <span>{item.market_name}</span>
                             </div>
-                            <div className="text-[11px] text-slate-400 pl-4">{item.district_name}, AP</div>
+                            <div className="text-[11px] text-slate-400 pl-4 flex items-center gap-1.5 flex-wrap mt-0.5">
+                              <span>{item.district_name}, AP</span>
+                              {item.distance_text && (
+                                <span className="inline-flex items-center gap-1 text-[10px] font-bold text-teal-300 bg-teal-500/15 border border-teal-400/30 px-1.5 py-0.2 rounded-full">
+                                  <Navigation className="w-2.5 h-2.5 fill-current" />
+                                  {item.distance_text}
+                                </span>
+                              )}
+                            </div>
                           </td>
 
                           {/* Updated */}
@@ -892,11 +1035,19 @@ export const ComparePricesPage: React.FC = () => {
                       </div>
 
                       {/* Market Info */}
-                      <div className="flex items-center gap-1.5 text-xs text-slate-300 mb-4 bg-slate-800/50 p-2.5 rounded-2xl border border-slate-700/50">
-                        <MapPin className="w-3.5 h-3.5 text-sky-400 shrink-0" />
-                        <span className="font-semibold">{item.market_name}</span>
-                        <span className="text-slate-500">•</span>
-                        <span className="text-slate-400">{item.district_name}, AP</span>
+                      <div className="flex items-center justify-between gap-1.5 text-xs text-slate-300 mb-4 bg-slate-800/50 p-2.5 rounded-2xl border border-slate-700/50 flex-wrap">
+                        <div className="flex items-center gap-1.5">
+                          <MapPin className="w-3.5 h-3.5 text-sky-400 shrink-0" />
+                          <span className="font-semibold">{item.market_name}</span>
+                          <span className="text-slate-500">•</span>
+                          <span className="text-slate-400">{item.district_name}, AP</span>
+                        </div>
+                        {item.distance_text && (
+                          <span className="inline-flex items-center gap-1 text-[10px] font-extrabold text-teal-300 bg-teal-500/15 border border-teal-400/30 px-2 py-0.5 rounded-full">
+                            <Navigation className="w-2.5 h-2.5 fill-current" />
+                            {item.distance_text}
+                          </span>
+                        )}
                       </div>
 
                       {/* Price Highlight Banner */}

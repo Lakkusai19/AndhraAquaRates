@@ -62,7 +62,24 @@ export const translations = {
     freshListingsToday: "Today's Fresh Sheets",
     transparencyNote: "100% Free for Shrimp Farmers. No registration or login required.",
     
-    // Buyer Dashboard & Publishing
+    // Location Preference (English)
+    locationPreference: "Location Preference",
+    myLocation: "My Location",
+    changeLocation: "Change Location",
+    surroundRadius: "300 km Surround",
+    within300km: "Within 300 km",
+    showingWithin300km: "Showing verified buyers & top rates within 300 km",
+    detectLocation: "Detect My Location (GPS)",
+    detectingLocation: "Detecting your location...",
+    selectDistrict: "Select Your District",
+    allAndhraPradesh: "All Andhra Pradesh (No Radius Limit)",
+    viewAllAP: "View All AP",
+    nearestFirst: "Nearest Buyers First",
+    kmAway: "km away",
+    locationPrefDesc: "Set your location to see buyers and the highest purchasing rates within 300 km of your prawn ponds.",
+    locationSetSuccess: "Location preference updated! Showing rates within 300 km.",
+    
+    // Buyer Dashboard & Publishing (en)
     subscriptionAlertTitle: "Subscription Notice",
     subscriptionAlertDesc: "Your buyer subscription is currently inactive. You must subscribe to publish or update daily shrimp purchase rates.",
     subscribeNow: "Subscribe Now (₹499/mo)",
@@ -134,7 +151,24 @@ export const translations = {
     freshListingsToday: "నేటి తాజా ధరల జాబితాలు",
     transparencyNote: "రొయ్యల రైతులకు 100% ఉచితం. ఎటువంటి నమోదు లేదా లాగిన్ అవసరం లేదు.",
     
-    // Buyer Dashboard & Publishing
+    // Location Preference (Telugu)
+    locationPreference: "లొకేషన్ ప్రాధాన్యత",
+    myLocation: "నా లొకేషన్",
+    changeLocation: "లొకేషన్ మార్చండి",
+    surroundRadius: "300 కి.మీ పరిధి",
+    within300km: "300 కి.మీ పరిధిలో",
+    showingWithin300km: "మీ సమీపంలోని 300 కి.మీ పరిధిలోని కొనుగోలుదారులు మరియు అత్యధిక ధరలు",
+    detectLocation: "నా లొకేషన్ గుర్తించండి (GPS)",
+    detectingLocation: "లొకేషన్ గుర్తిస్తోంది...",
+    selectDistrict: "మీ జిల్లాను ఎంచుకోండి",
+    allAndhraPradesh: "మొత్తం ఆంధ్రప్రదేశ్ (పరిధి పరిమితి లేదు)",
+    viewAllAP: "మొత్తం ఆంధ్రప్రదేశ్ చూడండి",
+    nearestFirst: "సమీప కొనుగోలుదారులు మొదట",
+    kmAway: "కి.మీ దూరంలో",
+    locationPrefDesc: "మీ రొయ్యల చెరువుల సమీపంలోని 300 కి.మీ పరిధిలోని కొనుగోలుదారులు మరియు అత్యధిక ధరలను చూడటానికి మీ జిల్లాను ఎంచుకోండి.",
+    locationSetSuccess: "లొకేషన్ నవీకరించబడింది! 300 కి.మీ పరిధిలోని ధరలు చూపబడుతున్నాయి.",
+    
+    // Buyer Dashboard & Publishing (te)
     subscriptionAlertTitle: "సభ్యత్వ నోటీసు",
     subscriptionAlertDesc: "మీ కొనుగోలుదారు చందా ప్రస్తుతం నిష్క్రియంగా ఉంది. ధరలను ప్రచురించడానికి దయచేసి చందాను ప్రారంభించండి.",
     subscribeNow: "సభ్యత్వాన్ని ప్రారంభించండి (నెలకు ₹499)",
