@@ -33,12 +33,18 @@ const LocationContext = createContext<LocationContextType | undefined>(undefined
 // Haversine formula in JS for nearest district matching
 function calculateDistanceKm(lat1: number, lon1: number, lat2: number, lon2: number): number {
   const R = 6371; // km
-  const dLat = ((lat2 - lat1) * Math.PI) / 180;
-  const dLon = ((lon2 - lon1) * Math.PI) / 180;
+  const nLat1 = Number(lat1);
+  const nLon1 = Number(lon1);
+  const nLat2 = Number(lat2);
+  const nLon2 = Number(lon2);
+  if (isNaN(nLat1) || isNaN(nLon1) || isNaN(nLat2) || isNaN(nLon2)) return Infinity;
+
+  const dLat = ((nLat2 - nLat1) * Math.PI) / 180;
+  const dLon = ((nLon2 - nLon1) * Math.PI) / 180;
   const a =
     Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-    Math.cos((lat1 * Math.PI) / 180) *
-      Math.cos((lat2 * Math.PI) / 180) *
+    Math.cos((nLat1 * Math.PI) / 180) *
+      Math.cos((nLat2 * Math.PI) / 180) *
       Math.sin(dLon / 2) *
       Math.sin(dLon / 2);
   const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
@@ -143,6 +149,19 @@ export const LocationProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     }
 
     setIsDetecting(true);
+
+    // Ensure we have districts list even if state is pending
+    let candidateDistricts = districts;
+    if (!candidateDistricts || candidateDistricts.length === 0) {
+      try {
+        const res = await locationsApi.getDistricts();
+        candidateDistricts = res.data || [];
+        setDistricts(candidateDistricts);
+      } catch (e) {
+        candidateDistricts = [];
+      }
+    }
+
     return new Promise((resolve) => {
       navigator.geolocation.getCurrentPosition(
         (position) => {
@@ -153,7 +172,7 @@ export const LocationProvider: React.FC<{ children: React.ReactNode }> = ({ chil
           let closest: District | null = null;
           let minDistance = Infinity;
 
-          districts.forEach((d) => {
+          candidateDistricts.forEach((d) => {
             if (d.latitude != null && d.longitude != null) {
               const dist = calculateDistanceKm(latitude, longitude, d.latitude, d.longitude);
               if (dist < minDistance) {
@@ -163,7 +182,8 @@ export const LocationProvider: React.FC<{ children: React.ReactNode }> = ({ chil
             }
           });
 
-          const matchedDistrict = closest || districts.find((d) => d.id === DEFAULT_LOCATION.districtId) || {
+          // If no match found, fallback to West Godavari (the shrimp capital)
+          const matchedDistrict = closest || candidateDistricts.find((d) => d.name.toLowerCase().includes('west godavari')) || {
             id: DEFAULT_LOCATION.districtId,
             name: DEFAULT_LOCATION.districtName,
             latitude: DEFAULT_LOCATION.lat,
@@ -173,8 +193,8 @@ export const LocationProvider: React.FC<{ children: React.ReactNode }> = ({ chil
           const newPref: LocationPreference = {
             districtId: matchedDistrict.id,
             districtName: matchedDistrict.name,
-            lat: latitude,
-            lng: longitude,
+            lat: matchedDistrict.latitude ?? latitude,
+            lng: matchedDistrict.longitude ?? longitude,
             radiusKm: locationPreference.radiusKm || 300,
             isAutoDetected: true,
           };
@@ -184,9 +204,15 @@ export const LocationProvider: React.FC<{ children: React.ReactNode }> = ({ chil
           localStorage.setItem(STORAGE_KEY, JSON.stringify(newPref));
           localStorage.setItem(HAS_SET_KEY, 'true');
 
+          const isOutsideAP = minDistance > 80;
+          let msg = `📍 Nearest AP District: ${matchedDistrict.name} (~${Math.round(minDistance)} km away).`;
+          if (isOutsideAP) {
+            msg = `📍 Device detected in Hyderabad / outside coastal AP. Matched closest AP district: ${matchedDistrict.name} (~${Math.round(minDistance)} km). Please select your coastal pond district if farming in AP.`;
+          }
+
           resolve({
             success: true,
-            message: `Detected nearest district: ${matchedDistrict.name} (~${Math.round(minDistance)} km)`,
+            message: msg,
           });
         },
         (error) => {

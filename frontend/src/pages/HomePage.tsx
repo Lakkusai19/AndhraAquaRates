@@ -27,7 +27,7 @@ import { ImportantDisclaimerTicker } from '../components/common/ImportantDisclai
 
 export const HomePage: React.FC = () => {
   const { t, language } = useLanguage();
-  const { locationPreference, openLocationModal } = useLocationPreference();
+  const { locationPreference, openLocationModal, setPreferredDistrict } = useLocationPreference();
   const navigate = useNavigate();
 
   const [districts, setDistricts] = useState<District[]>([]);
@@ -355,8 +355,38 @@ export const HomePage: React.FC = () => {
             ))}
           </div>
         ) : recentPrices.length === 0 ? (
-          <div className="text-center py-12 bg-slate-800/60 rounded-2xl border border-slate-700">
-            <p className="text-slate-400 text-sm">No price sheets published yet for today. Check back shortly.</p>
+          <div className="text-center py-10 px-4 bg-slate-900/80 rounded-3xl border border-slate-800 backdrop-blur-xl">
+            <div className="w-12 h-12 rounded-2xl bg-sky-500/10 text-sky-400 border border-sky-500/20 flex items-center justify-center mx-auto mb-3">
+              <MapPin className="w-6 h-6 text-teal-400" />
+            </div>
+            <h3 className="text-sm sm:text-base font-extrabold text-white mb-1">
+              {language === 'te'
+                ? `${locationPreference.districtName} పరిసరాల్లో నేటి ధరల షీట్లు లేవు`
+                : `No active shrimp buyer prices found within 300 km of ${locationPreference.districtName}`}
+            </h3>
+            <p className="text-xs text-slate-400 max-w-md mx-auto mb-4 leading-relaxed">
+              {language === 'te'
+                ? 'మీ రొయ్యల చెరువులు ఉన్న తీరప్రాంత జిల్లాను (ఉదా: పశ్చిమ గోదావరి, కృష్ణా, బాపట్ల, నెల్లూరు) ఎంచుకోండి.'
+                : 'Select the coastal aquaculture district where your shrimp ponds are located (e.g. West Godavari, Krishna, Nellore, Bapatla) to view today\'s highest buying rates.'}
+            </p>
+            <div className="flex flex-wrap items-center justify-center gap-2">
+              <button
+                type="button"
+                onClick={() => setPreferredDistrict(1)}
+                className="py-2 px-4 rounded-xl bg-gradient-to-r from-sky-400 via-teal-400 to-emerald-400 hover:brightness-110 text-slate-950 font-black text-xs shadow-md transition-all flex items-center gap-1.5 cursor-pointer active:scale-95"
+              >
+                <Sparkles className="w-3.5 h-3.5" />
+                <span>{language === 'te' ? 'పశ్చిమ గోదావరి రేట్లు చూడండి (భీమవరం)' : 'Switch to West Godavari (Bhimavaram)'}</span>
+              </button>
+              <button
+                type="button"
+                onClick={openLocationModal}
+                className="py-2 px-3.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-sky-300 border border-sky-400/30 font-bold text-xs transition-all flex items-center gap-1.5 cursor-pointer"
+              >
+                <MapPin className="w-3.5 h-3.5 text-teal-400" />
+                <span>{language === 'te' ? 'లొకేషన్ మార్చండి' : 'Change Location'}</span>
+              </button>
+            </div>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
