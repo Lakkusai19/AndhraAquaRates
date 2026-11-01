@@ -15,6 +15,21 @@ import {
   Check
 } from 'lucide-react';
 
+const loadRazorpayScript = (): Promise<boolean> => {
+  return new Promise((resolve) => {
+    if ((window as any).Razorpay) {
+      resolve(true);
+      return;
+    }
+    const script = document.createElement('script');
+    script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+    script.async = true;
+    script.onload = () => resolve(true);
+    script.onerror = () => resolve(false);
+    document.body.appendChild(script);
+  });
+};
+
 export const SubscriptionPage: React.FC = () => {
   const navigate = useNavigate();
   const { user, refreshUser, hasActiveSubscription } = useAuth();
@@ -47,29 +62,40 @@ export const SubscriptionPage: React.FC = () => {
     fetchPlans();
   }, []);
 
-  const handleInitiatePayment = async () => {
-    if (!selectedPlan) return;
+  const handleInitiatePayment = async (planToUse?: SubscriptionPlan) => {
+    const plan = planToUse || selectedPlan;
+    if (!plan) return;
     setError(null);
     setCheckoutLoading(true);
 
     try {
-      const orderRes = await paymentsApi.checkout(selectedPlan.id);
+      const orderRes = await paymentsApi.checkout(plan.id);
       const orderData = orderRes.data;
 
-      // Check if real Razorpay checkout window is loaded
-      if (typeof (window as any).Razorpay !== 'undefined' && !orderData.is_mock) {
+      // In mock / test mode, open safe test simulation dialog
+      if (orderData.is_mock) {
+        setSimOrderData(orderData);
+        setShowSimModal(true);
+        setCheckoutLoading(false);
+        return;
+      }
+
+      // Live or real test key: ensure Razorpay checkout script is loaded
+      const isScriptLoaded = await loadRazorpayScript();
+      if (isScriptLoaded && typeof (window as any).Razorpay !== 'undefined') {
         const options = {
           key: orderData.key_id,
           amount: orderData.amount_in_paise,
           currency: orderData.currency,
           name: 'ANDHRA AQUA RATES',
-          description: selectedPlan.name,
+          description: plan.name,
           order_id: orderData.order_id,
           handler: async function (response: any) {
             await handleVerifyPayment(
               orderData.order_id,
               response.razorpay_payment_id,
-              response.razorpay_signature
+              response.razorpay_signature,
+              plan.id
             );
           },
           prefill: {
@@ -80,11 +106,20 @@ export const SubscriptionPage: React.FC = () => {
           theme: {
             color: '#0284c7',
           },
+          modal: {
+            ondismiss: function () {
+              setCheckoutLoading(false);
+            },
+          },
         };
         const rzp = new (window as any).Razorpay(options);
+        rzp.on('payment.failed', function (response: any) {
+          setError(response.error?.description || 'Razorpay payment was unsuccessful.');
+          setCheckoutLoading(false);
+        });
         rzp.open();
       } else {
-        // Open safe test simulation dialog
+        // Fallback to test simulation dialog if script or network blocked
         setSimOrderData(orderData);
         setShowSimModal(true);
       }
@@ -95,7 +130,7 @@ export const SubscriptionPage: React.FC = () => {
     }
   };
 
-  const handleVerifyPayment = async (orderId: string, paymentId: string, signature: string) => {
+  const handleVerifyPayment = async (orderId: string, paymentId: string, signature: string, planId?: number) => {
     setCheckoutLoading(true);
     setShowSimModal(false);
     try {
@@ -103,7 +138,7 @@ export const SubscriptionPage: React.FC = () => {
         order_id: orderId,
         payment_id: paymentId,
         signature: signature,
-        plan_id: selectedPlan?.id,
+        plan_id: planId || selectedPlan?.id,
       });
 
       setSuccessMessage(verifyRes.data.message || 'Payment verified. Subscription ACTIVE!');
@@ -252,7 +287,7 @@ export const SubscriptionPage: React.FC = () => {
                       onClick={(e) => {
                         e.stopPropagation();
                         setSelectedPlan(plan);
-                        handleInitiatePayment();
+                        handleInitiatePayment(plan);
                       }}
                       disabled={checkoutLoading}
                       className={`w-full py-3 px-4 rounded-xl font-bold text-sm shadow-md transition-all flex items-center justify-center gap-2 ${
@@ -346,7 +381,8 @@ export const SubscriptionPage: React.FC = () => {
                   handleVerifyPayment(
                     simOrderData.order_id,
                     `pay_sim_${Date.now()}`,
-                    'mock_valid_signature'
+                    'mock_valid_signature',
+                    simOrderData.plan_id
                   )
                 }
                 disabled={checkoutLoading}

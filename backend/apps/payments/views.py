@@ -96,6 +96,16 @@ class VerifyPaymentView(APIView):
             else:
                 plan = SubscriptionPlan.objects.filter(is_active=True).first()
 
+        if not plan:
+            plan = SubscriptionPlan.objects.create(
+                name='ANDHRA AQUA RATES Buyer Monthly',
+                amount=499.00,
+                currency='INR',
+                billing_interval='MONTH',
+                billing_interval_count=1,
+                is_active=True
+            )
+
         # 3. Server-side activation
         subscription = RazorpayService.process_successful_payment(
             buyer=buyer,
