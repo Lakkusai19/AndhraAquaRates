@@ -241,8 +241,8 @@ SPECTACULAR_SETTINGS = {
 }
 
 # Razorpay Configuration
-RAZORPAY_KEY_ID = os.getenv('RAZORPAY_KEY_ID', 'rzp_test_mock_andhra_shrimp')
-RAZORPAY_KEY_SECRET = os.getenv('RAZORPAY_KEY_SECRET', 'mock_razorpay_secret_key_12345')
+RAZORPAY_KEY_ID = os.getenv('RAZORPAY_KEY_ID', 'rzp_test_TurzuMY8g2FRMy')
+RAZORPAY_KEY_SECRET = os.getenv('RAZORPAY_KEY_SECRET', 'gW8L02yLWrsSqodb39MUsc2M')
 RAZORPAY_WEBHOOK_SECRET = os.getenv('RAZORPAY_WEBHOOK_SECRET', 'mock_webhook_secret_67890')
 RAZORPAY_PLAN_ID = os.getenv('RAZORPAY_PLAN_ID', 'plan_monthly_499')
 
