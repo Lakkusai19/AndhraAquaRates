@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Waves, Phone, Mail, ShieldCheck, Heart } from 'lucide-react';
+import { Mail, ShieldCheck } from 'lucide-react';
 import { useLanguage } from '../../context/LanguageContext';
 
 export const Footer: React.FC = () => {
@@ -89,10 +89,6 @@ export const Footer: React.FC = () => {
           <div>
             <h4 className="text-white font-semibold text-xs tracking-wider uppercase mb-3">Market Support Desk</h4>
             <div className="space-y-2 text-xs">
-              <div className="flex items-center gap-2">
-                <Phone className="w-4 h-4 text-sky-400" />
-                <span>+91 98480 12345 (Toll-Free Support)</span>
-              </div>
               <div className="flex items-center gap-2">
                 <Mail className="w-4 h-4 text-sky-400" />
                 <span>support@andhraaquarates.com</span>
