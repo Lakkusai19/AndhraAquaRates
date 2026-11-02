@@ -31,11 +31,11 @@ export const Navbar: React.FC = () => {
 
   return (
     <header className="sticky top-0 z-50 w-full select-none backdrop-blur-xl bg-slate-950/90 border-b border-sky-500/20 text-white transition-all shadow-md shadow-slate-950/40">
-      <div className="w-full max-w-[1440px] mx-auto px-2.5 sm:px-4 lg:px-4 xl:px-8">
+      <div className="w-full max-w-[1440px] mx-auto px-2 sm:px-3 lg:px-4 xl:px-8">
         {/* Strictly locked h-18 (72px) height to prevent downward ballooning on language switch */}
-        <div className="flex items-center justify-between h-18 gap-2">
+        <div className="flex items-center justify-between h-18 gap-1.5 sm:gap-2">
           
-          <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+          <div className="flex items-center gap-1.5 sm:gap-2.5 shrink-0">
             {/* Global Back Arrow (Accessible on mobile and system whenever not on homepage) */}
             {location.pathname !== '/' && (
               <button
@@ -43,10 +43,10 @@ export const Navbar: React.FC = () => {
                 onClick={() => navigate(-1)}
                 aria-label={language === 'te' ? 'వెనుకకు' : 'Back'}
                 title={language === 'te' ? 'మునుపటి పేజీకి వెళ్లండి' : 'Go back'}
-                className="p-1.5 sm:px-3 sm:py-1.5 rounded-xl bg-slate-900/90 hover:bg-slate-800 text-sky-400 hover:text-teal-300 border border-sky-500/30 shadow-sm transition-all flex items-center gap-1.5 shrink-0 group active:scale-95 cursor-pointer"
+                className="p-1.5 sm:p-2 xl:px-3 xl:py-1.5 rounded-xl bg-slate-900/90 hover:bg-slate-800 text-sky-400 hover:text-teal-300 border border-sky-500/30 shadow-sm transition-all flex items-center gap-1.5 shrink-0 group active:scale-95 cursor-pointer"
               >
                 <ArrowLeft className="w-4 h-4 transition-transform group-hover:-translate-x-1" />
-                <span className="hidden sm:inline text-xs font-bold">
+                <span className="hidden xl:inline text-xs font-bold">
                   {language === 'te' ? 'వెనుకకు' : 'Back'}
                 </span>
               </button>
@@ -55,10 +55,10 @@ export const Navbar: React.FC = () => {
             {/* 1. BRAND LOGO (Single-line lock, zero wrapping) */}
             <Link
               to="/"
-              className="flex items-center gap-2 sm:gap-2.5 shrink-0 group outline-none py-1 transition-transform"
+              className="flex items-center gap-1.5 sm:gap-2 shrink-0 group outline-none py-1 transition-transform"
             >
             {/* Official Brand Logo Icon with subtle glowing ring */}
-            <div className="relative w-8 h-8 sm:w-10 sm:h-10 xl:w-11 xl:h-11 rounded-full overflow-hidden p-[1.5px] bg-gradient-to-tr from-sky-400 via-teal-300 to-emerald-400 shadow-md shadow-sky-500/25 group-hover:scale-105 group-hover:shadow-sky-400/40 transition-all shrink-0">
+            <div className="relative w-8 h-8 sm:w-9 sm:h-9 xl:w-10 xl:h-10 rounded-full overflow-hidden p-[1.5px] bg-gradient-to-tr from-sky-400 via-teal-300 to-emerald-400 shadow-md shadow-sky-500/25 group-hover:scale-105 group-hover:shadow-sky-400/40 transition-all shrink-0">
               <img
                 src="/logo.png"
                 alt="ANDHRA AQUA RATES Official Logo"
@@ -69,7 +69,7 @@ export const Navbar: React.FC = () => {
             {/* Brand Typography (strictly whitespace-nowrap, no break) */}
             <div className="flex flex-col text-left shrink-0 justify-center">
               <div className="flex items-center gap-1.5 leading-none whitespace-nowrap">
-                <span className="font-extrabold text-sm sm:text-lg xl:text-xl tracking-tight text-white group-hover:text-sky-300 transition-colors uppercase">
+                <span className="font-extrabold text-sm sm:text-base xl:text-lg tracking-tight text-white group-hover:text-sky-300 transition-colors uppercase">
                   Andhra Aqua
                 </span>
                 <span className="text-[8px] sm:text-[9px] xl:text-[10px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded bg-gradient-to-r from-sky-400 to-teal-300 text-slate-950 shrink-0 shadow-xs">
@@ -90,9 +90,10 @@ export const Navbar: React.FC = () => {
 
           {/* 2. CENTER NAVIGATION LINKS (whitespace-nowrap & shrink-0) */}
           <nav className="hidden lg:flex items-center space-x-1 shrink-0">
+            {/* Home link displayed on xl screens since logo already navigates to home */}
             <Link
               to="/"
-              className={`px-2.5 xl:px-3.5 py-1.5 rounded-xl text-xs xl:text-sm font-bold transition-all whitespace-nowrap shrink-0 ${
+              className={`hidden xl:inline-flex px-3 py-1.5 rounded-xl text-xs xl:text-sm font-bold transition-all whitespace-nowrap shrink-0 ${
                 isActive('/')
                   ? 'text-sky-300 bg-sky-500/15 border border-sky-400/30'
                   : 'text-slate-300 hover:text-white hover:bg-white/[0.08]'
@@ -103,33 +104,33 @@ export const Navbar: React.FC = () => {
 
             <Link
               to="/compare"
-              className={`px-2.5 xl:px-3.5 py-1.5 rounded-xl text-xs xl:text-sm font-bold transition-all flex items-center gap-1.5 whitespace-nowrap shrink-0 ${
+              className={`px-2 xl:px-3 py-1.5 rounded-xl text-xs xl:text-sm font-bold transition-all flex items-center gap-1.5 whitespace-nowrap shrink-0 ${
                 isActive('/compare')
                   ? 'text-sky-300 bg-sky-500/15 border border-sky-400/30'
                   : 'text-slate-300 hover:text-white hover:bg-white/[0.08]'
               }`}
             >
               <Scale className="w-3.5 h-3.5 text-sky-400 shrink-0" />
-              <span className="lg:hidden xl:inline">{t.compareTodayPrices}</span>
-              <span className="hidden lg:inline xl:hidden">{language === 'te' ? 'ధరల పోలిక' : 'Compare Prices'}</span>
+              <span className="hidden xl:inline">{t.compareTodayPrices}</span>
+              <span className="xl:hidden">{language === 'te' ? 'ధరల పోలిక' : 'Compare Rates'}</span>
             </Link>
 
             <Link
               to="/locations"
-              className={`px-2.5 xl:px-3.5 py-1.5 rounded-xl text-xs xl:text-sm font-bold transition-all flex items-center gap-1.5 whitespace-nowrap shrink-0 ${
+              className={`px-2 xl:px-3 py-1.5 rounded-xl text-xs xl:text-sm font-bold transition-all flex items-center gap-1.5 whitespace-nowrap shrink-0 ${
                 isActive('/locations')
                   ? 'text-sky-300 bg-sky-500/15 border border-sky-400/30'
                   : 'text-slate-300 hover:text-white hover:bg-white/[0.08]'
               }`}
             >
               <MapPin className="w-3.5 h-3.5 text-slate-400 shrink-0" />
-              <span className="lg:hidden xl:inline">{t.locations}</span>
-              <span className="hidden lg:inline xl:hidden">{language === 'te' ? 'ప్రాంతాలు' : 'Locations'}</span>
+              <span className="hidden xl:inline">{t.locations}</span>
+              <span className="xl:hidden">{language === 'te' ? 'ప్రాంతాలు' : 'Locations'}</span>
             </Link>
 
             <Link
               to="/how-it-works"
-              className={`px-2.5 xl:px-3.5 py-1.5 rounded-xl text-xs xl:text-sm font-bold transition-all flex items-center gap-1.5 whitespace-nowrap shrink-0 ${
+              className={`px-2 xl:px-3 py-1.5 rounded-xl text-xs xl:text-sm font-bold transition-all flex items-center gap-1.5 whitespace-nowrap shrink-0 ${
                 isActive('/how-it-works')
                   ? 'text-sky-300 bg-sky-500/15 border border-sky-400/30'
                   : 'text-slate-300 hover:text-white hover:bg-white/[0.08]'
@@ -141,17 +142,17 @@ export const Navbar: React.FC = () => {
           </nav>
 
           {/* 3. RIGHT ACTIONS: Location, Language, Buyer & Auth (whitespace-nowrap & shrink-0) */}
-          <div className="hidden md:flex items-center gap-1.5 lg:gap-2 xl:gap-2.5 shrink-0">
+          <div className="hidden md:flex items-center gap-1.5 xl:gap-2 shrink-0">
             
             {/* Location Preference Pill (300 km radius) */}
             <button
               type="button"
               onClick={openLocationModal}
               title={language === 'te' ? 'లొకేషన్ ప్రాధాన్యత మార్చండి (300 కి.మీ పరిధి)' : 'Change Location Preference (300 km surround)'}
-              className="flex items-center gap-1 xl:gap-1.5 px-2.5 xl:px-3 py-1.5 rounded-full bg-slate-900/90 hover:bg-slate-800 text-sky-300 hover:text-white border border-sky-400/35 hover:border-teal-400 text-xs font-bold transition-all shadow-sm group cursor-pointer shrink-0 active:scale-95"
+              className="flex items-center gap-1 xl:gap-1.5 px-2 xl:px-2.5 py-1.5 rounded-full bg-slate-900/90 hover:bg-slate-800 text-sky-300 hover:text-white border border-sky-400/35 hover:border-teal-400 text-xs font-bold transition-all shadow-sm group cursor-pointer shrink-0 active:scale-95"
             >
               <MapPin className="w-3.5 h-3.5 text-teal-400 group-hover:scale-110 transition-transform shrink-0" />
-              <span className="truncate max-w-[75px] lg:max-w-[85px] xl:max-w-[120px]">{locationPreference.districtName}</span>
+              <span className="truncate max-w-[65px] lg:max-w-[75px] xl:max-w-[120px]">{locationPreference.districtName}</span>
               <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-sky-500/20 text-sky-300 border border-sky-400/30 font-semibold shrink-0">
                 {locationPreference.radiusKm || 300}km
               </span>
@@ -162,7 +163,7 @@ export const Navbar: React.FC = () => {
               <button
                 type="button"
                 onClick={() => setLanguage('en')}
-                className={`px-2 xl:px-2.5 py-0.5 xl:py-1 rounded-full text-xs font-bold transition-all whitespace-nowrap ${
+                className={`px-1.5 xl:px-2 py-0.5 xl:py-1 rounded-full text-xs font-bold transition-all whitespace-nowrap ${
                   language === 'en'
                     ? 'bg-sky-500 text-slate-950 shadow-sm'
                     : 'text-slate-400 hover:text-white'
@@ -173,7 +174,7 @@ export const Navbar: React.FC = () => {
               <button
                 type="button"
                 onClick={() => setLanguage('te')}
-                className={`px-2 xl:px-2.5 py-0.5 xl:py-1 rounded-full text-xs font-bold transition-all whitespace-nowrap ${
+                className={`px-1.5 xl:px-2 py-0.5 xl:py-1 rounded-full text-xs font-bold transition-all whitespace-nowrap ${
                   language === 'te'
                     ? 'bg-sky-500 text-slate-950 shadow-sm'
                     : 'text-slate-400 hover:text-white'
@@ -190,10 +191,11 @@ export const Navbar: React.FC = () => {
                   <>
                     <Link
                       to="/buyer/dashboard"
-                      className="px-3 xl:px-3.5 py-1.5 rounded-xl text-xs font-bold bg-slate-800 hover:bg-slate-700 text-sky-300 flex items-center gap-1.5 border border-slate-700 transition-colors whitespace-nowrap shrink-0"
+                      className="px-2.5 xl:px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-800 hover:bg-slate-700 text-sky-300 flex items-center gap-1.5 border border-slate-700 transition-colors whitespace-nowrap shrink-0"
                     >
                       <LayoutDashboard className="w-3.5 h-3.5 shrink-0" />
-                      <span>{t.buyerDashboard}</span>
+                      <span className="hidden xl:inline">{t.buyerDashboard}</span>
+                      <span className="xl:hidden">{language === 'te' ? 'డ్యాష్‌బోర్డ్' : 'Portal'}</span>
                     </Link>
 
                     <span
@@ -211,7 +213,7 @@ export const Navbar: React.FC = () => {
                 {isAdmin && (
                   <Link
                     to="/admin"
-                    className="px-3 py-1.5 rounded-xl text-xs font-bold bg-purple-500/20 text-purple-300 hover:bg-purple-500/30 flex items-center gap-1.5 border border-purple-500/40 whitespace-nowrap shrink-0"
+                    className="px-2.5 py-1.5 rounded-xl text-xs font-bold bg-purple-500/20 text-purple-300 hover:bg-purple-500/30 flex items-center gap-1.5 border border-purple-500/40 whitespace-nowrap shrink-0"
                   >
                     <ShieldAlert className="w-3.5 h-3.5 shrink-0" />
                     <span>Admin</span>
@@ -232,15 +234,16 @@ export const Navbar: React.FC = () => {
               <div className="flex items-center gap-1.5 xl:gap-2 shrink-0">
                 <Link
                   to="/login"
-                  className="px-2.5 xl:px-3.5 py-1.5 text-xs font-bold text-slate-200 hover:text-white hover:bg-white/10 rounded-xl transition-all flex items-center gap-1.5 whitespace-nowrap shrink-0"
+                  className="px-2 xl:px-3 py-1.5 text-xs font-bold text-slate-200 hover:text-white hover:bg-white/10 rounded-xl transition-all flex items-center gap-1.5 whitespace-nowrap shrink-0"
                 >
                   <LogIn className="w-3.5 h-3.5 text-sky-400 shrink-0" />
-                  <span>{t.buyerLogin}</span>
+                  <span className="hidden xl:inline">{t.buyerLogin}</span>
+                  <span className="xl:hidden">{language === 'te' ? 'లాగిన్' : 'Login'}</span>
                 </Link>
 
                 <Link
                   to="/register"
-                  className="px-3 xl:px-4 py-1.5 text-xs font-extrabold rounded-xl bg-gradient-to-r from-sky-400 via-teal-400 to-emerald-400 text-slate-950 hover:brightness-110 shadow-md shadow-sky-500/25 transition-all flex items-center gap-1.5 whitespace-nowrap shrink-0"
+                  className="px-2.5 xl:px-3.5 py-1.5 text-xs font-extrabold rounded-xl bg-gradient-to-r from-sky-400 via-teal-400 to-emerald-400 text-slate-950 hover:brightness-110 shadow-md shadow-sky-500/25 transition-all flex items-center gap-1.5 whitespace-nowrap shrink-0"
                 >
                   <UserPlus className="w-3.5 h-3.5 text-slate-950 shrink-0" />
                   <span>{t.registerAsBuyer}</span>
