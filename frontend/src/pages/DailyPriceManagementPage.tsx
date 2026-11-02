@@ -885,7 +885,7 @@ export const DailyPriceManagementPage: React.FC = () => {
 
       {/* Delete Sheet Modal */}
       {deleteSheetModalOpen && currentSheet && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 p-4 backdrop-blur-sm animate-fadeIn">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-950/60 p-4 backdrop-blur-sm animate-fadeIn">
           <div className="bg-white rounded-3xl max-w-md w-full p-6 sm:p-7 shadow-2xl border border-slate-200">
             <div className="flex items-center gap-3 text-rose-600 mb-3">
               <div className="w-12 h-12 rounded-2xl bg-rose-100 flex items-center justify-center shrink-0">
@@ -929,7 +929,7 @@ export const DailyPriceManagementPage: React.FC = () => {
 
       {/* Delete Single Entry Modal */}
       {deleteEntryTarget && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 p-4 backdrop-blur-sm animate-fadeIn">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-950/60 p-4 backdrop-blur-sm animate-fadeIn">
           <div className="bg-white rounded-3xl max-w-sm w-full p-6 shadow-2xl border border-slate-200">
             <div className="flex items-center gap-3 text-rose-600 mb-3">
               <div className="w-10 h-10 rounded-2xl bg-rose-100 flex items-center justify-center shrink-0">
@@ -974,7 +974,7 @@ export const DailyPriceManagementPage: React.FC = () => {
 
       {/* Preview Modal */}
       {previewOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 p-4 backdrop-blur-sm">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-950/60 p-4 backdrop-blur-sm">
           <div className="bg-white rounded-3xl max-w-lg w-full p-6 shadow-2xl border border-slate-200">
             <div className="flex items-center justify-between mb-4 pb-2 border-b border-slate-100">
               <div>

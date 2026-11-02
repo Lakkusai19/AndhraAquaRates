@@ -1171,7 +1171,7 @@ export const ComparePricesPage: React.FC = () => {
       {/* 4. MODALS (BUYER INSPECTION & DELETE CONFIRMATION)       */}
       {/* ======================================================== */}
       {selectedItem && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 p-4 backdrop-blur-md animate-fadeIn">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-950/80 p-4 backdrop-blur-md animate-fadeIn">
           <div className="bg-slate-900 rounded-3xl max-w-lg w-full p-6 sm:p-7 shadow-2xl border border-slate-700 relative text-slate-100 animate-in fade-in zoom-in-95">
             <div className="flex items-start justify-between mb-5">
               <div>
@@ -1258,7 +1258,7 @@ export const ComparePricesPage: React.FC = () => {
 
       {/* Delete Rate Confirmation Modal */}
       {deleteTargetItem && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 p-4 backdrop-blur-md animate-fadeIn">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-950/80 p-4 backdrop-blur-md animate-fadeIn">
           <div className="bg-slate-900 rounded-3xl max-w-sm w-full p-6 shadow-2xl border border-rose-500/30 text-slate-100">
             <div className="flex items-center gap-3 text-rose-400 mb-3.5">
               <div className="w-11 h-11 rounded-2xl bg-rose-500/20 border border-rose-500/30 flex items-center justify-center shrink-0">

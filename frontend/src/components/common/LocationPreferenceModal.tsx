@@ -94,11 +94,17 @@ export const LocationPreferenceModal: React.FC = () => {
   });
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-950/80 backdrop-blur-md animate-in fade-in duration-200">
-      <div className="bg-slate-900 border border-sky-500/30 w-full max-w-lg rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[92vh]">
+    <div
+      className="fixed inset-0 z-[100] flex items-center justify-center p-3 sm:p-4 bg-slate-950/85 backdrop-blur-md animate-in fade-in duration-200 overflow-y-auto"
+      onClick={closeLocationModal}
+    >
+      <div
+        className="bg-slate-900 border border-sky-500/30 w-full max-w-lg rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh] my-auto"
+        onClick={(e) => e.stopPropagation()}
+      >
         
         {/* Header */}
-        <div className="p-4 sm:p-6 bg-gradient-to-r from-slate-900 via-sky-950/60 to-slate-900 border-b border-slate-800 flex items-start justify-between">
+        <div className="p-4 sm:p-6 bg-gradient-to-r from-slate-900 via-sky-950/60 to-slate-900 border-b border-slate-800 flex items-start justify-between shrink-0">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-2xl bg-gradient-to-tr from-sky-500 to-teal-400 flex items-center justify-center text-slate-950 font-black shadow-lg shadow-sky-500/25 shrink-0">
               <MapPin className="w-5 h-5 sm:w-6 sm:h-6" />
@@ -294,7 +300,7 @@ export const LocationPreferenceModal: React.FC = () => {
         </div>
 
         {/* Footer */}
-        <div className="p-4 sm:p-5 bg-slate-950 border-t border-slate-800 flex items-center justify-between gap-3">
+        <div className="p-4 sm:p-5 bg-slate-950 border-t border-slate-800 flex items-center justify-between gap-3 shrink-0">
           <div className="text-left">
             <span className="text-[11px] text-slate-400 block font-medium">
               {language === 'te' ? 'ఎంచుకున్న లొకేషన్:' : 'Selected Location:'}

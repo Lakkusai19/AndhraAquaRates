@@ -30,7 +30,7 @@ export const Navbar: React.FC = () => {
   const isActive = (path: string) => location.pathname === path;
 
   return (
-    <header className="sticky top-0 z-50 w-full select-none backdrop-blur-xl bg-slate-950/90 border-b border-sky-500/20 text-white transition-all shadow-md shadow-slate-950/40">
+    <header className="sticky top-0 z-40 w-full select-none backdrop-blur-xl bg-slate-950/90 border-b border-sky-500/20 text-white transition-all shadow-md shadow-slate-950/40">
       <div className="w-full max-w-[1440px] mx-auto px-3 sm:px-4 lg:px-6 xl:px-8">
         {/* Strictly locked h-18 (72px) height to prevent downward ballooning on language switch */}
         <div className="flex items-center justify-between h-18 gap-2">

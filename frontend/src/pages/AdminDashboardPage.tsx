@@ -811,7 +811,7 @@ export const AdminDashboardPage: React.FC = () => {
       {/* MODAL 1: EDIT BUYER DETAILS                              */}
       {/* ======================================================== */}
       {editingBuyer && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 p-4 backdrop-blur-sm overflow-y-auto">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-950/80 p-4 backdrop-blur-sm overflow-y-auto">
           <div className="bg-white rounded-3xl max-w-2xl w-full p-6 sm:p-8 shadow-2xl border border-slate-200 relative my-8 animate-in fade-in">
             <button
               onClick={() => setEditingBuyer(null)}
@@ -1019,7 +1019,7 @@ export const AdminDashboardPage: React.FC = () => {
       {/* MODAL 2: ADMIN PASSWORD RESET                            */}
       {/* ======================================================== */}
       {resetModalBuyer && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 p-4 backdrop-blur-sm">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-950/80 p-4 backdrop-blur-sm">
           <div className="bg-white rounded-3xl max-w-md w-full p-6 sm:p-7 shadow-2xl border border-slate-200 relative animate-in fade-in">
             <button
               onClick={() => {
@@ -1132,7 +1132,7 @@ export const AdminDashboardPage: React.FC = () => {
       {/* MODAL 3: DELETE BUYER CONFIRMATION                       */}
       {/* ======================================================== */}
       {deletingBuyer && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 p-4 backdrop-blur-sm">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-950/80 p-4 backdrop-blur-sm">
           <div className="bg-white rounded-3xl max-w-sm w-full p-6 shadow-2xl border border-red-200 text-center space-y-4 animate-in fade-in">
             <div className="w-12 h-12 rounded-2xl bg-red-100 text-red-600 flex items-center justify-center mx-auto">
               <AlertTriangle className="w-6 h-6" />
@@ -1168,7 +1168,7 @@ export const AdminDashboardPage: React.FC = () => {
       {/* MODAL 4: DELETE PRICE SHEET CONFIRMATION                 */}
       {/* ======================================================== */}
       {deletingSheet && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 p-4 backdrop-blur-sm">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-950/80 p-4 backdrop-blur-sm">
           <div className="bg-white rounded-3xl max-w-sm w-full p-6 shadow-2xl border border-red-200 text-center space-y-4 animate-in fade-in">
             <div className="w-12 h-12 rounded-2xl bg-red-100 text-red-600 flex items-center justify-center mx-auto">
               <AlertTriangle className="w-6 h-6" />

@@ -336,7 +336,7 @@ export const SubscriptionPage: React.FC = () => {
 
       {/* Simulated Razorpay Test Modal (For Developer / Test Mode) */}
       {showSimModal && simOrderData && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/70 p-4 backdrop-blur-sm">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-950/70 p-4 backdrop-blur-sm">
           <div className="bg-white rounded-3xl max-w-md w-full p-6 sm:p-8 shadow-2xl border border-slate-200 relative animate-in fade-in">
             <div className="flex items-center gap-3 mb-4">
               <div className="w-10 h-10 rounded-xl bg-sky-600 text-white flex items-center justify-center">

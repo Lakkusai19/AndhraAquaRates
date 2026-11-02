@@ -236,7 +236,7 @@ export const BuyerLoginPage: React.FC = () => {
 
       {/* Forgot Password 6-Digit Code Verification Modal */}
       {showResetModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/85 p-4 backdrop-blur-md">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-950/85 p-4 backdrop-blur-md">
           <div className="bg-slate-900 rounded-3xl max-w-md w-full p-6 sm:p-7 shadow-2xl border border-white/20 relative animate-in fade-in text-white">
             
             {/* Close button */}

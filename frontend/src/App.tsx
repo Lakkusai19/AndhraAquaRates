@@ -64,7 +64,6 @@ export default function App() {
           <AuthProvider>
             <Router>
               <div className="flex flex-col min-h-screen bg-slate-900 font-sans overflow-x-hidden w-full max-w-full">
-                <LocationPreferenceModal />
                 <Navbar />
                 <main className="flex-1 flex flex-col w-full max-w-full overflow-x-hidden">
                   <Routes>
@@ -127,8 +126,9 @@ export default function App() {
                   <Route path="*" element={<Navigate to="/" replace />} />
                 </Routes>
               </main>
-              <Footer />
-            </div>
+                <Footer />
+                <LocationPreferenceModal />
+              </div>
           </Router>
         </AuthProvider>
       </LocationProvider>
