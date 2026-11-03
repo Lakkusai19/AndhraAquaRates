@@ -1,4 +1,6 @@
+import os
 import decimal
+import secrets
 from datetime import timedelta
 from django.core.management.base import BaseCommand
 from django.utils import timezone
@@ -169,7 +171,7 @@ class Command(BaseCommand):
                 }
             )
             if not user.has_usable_password():
-                buyer_password = os.getenv('DEMO_BUYER_PASSWORD', 'AndhraBuyer@2026')
+                buyer_password = os.getenv('DEMO_BUYER_PASSWORD') or secrets.token_urlsafe(16)
                 user.set_password(buyer_password)
                 user.save()
 

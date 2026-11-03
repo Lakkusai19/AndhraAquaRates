@@ -1,4 +1,6 @@
+import os
 import decimal
+import secrets
 from datetime import timedelta
 from django.core.management.base import BaseCommand
 from django.utils import timezone
@@ -154,7 +156,7 @@ class Command(BaseCommand):
         admin_user.is_staff = True
         admin_user.is_superuser = True
         admin_user.email_verified = True
-        admin_password = os.getenv('DJANGO_ADMIN_PASSWORD', 'AndhraAdmin@2026')
+        admin_password = os.getenv('DJANGO_ADMIN_PASSWORD') or secrets.token_urlsafe(16)
         admin_user.set_password(admin_password)
         admin_user.save()
         self.stdout.write(f"[OK] Master Administrator account ready: lakkunagasai1144@gmail.com")
@@ -270,7 +272,7 @@ class Command(BaseCommand):
                 }
             )
             if u_created:
-                buyer_password = os.getenv('DEMO_BUYER_PASSWORD', 'AndhraBuyer@2026')
+                buyer_password = os.getenv('DEMO_BUYER_PASSWORD') or secrets.token_urlsafe(16)
                 user.set_password(buyer_password)
                 user.save()
 
