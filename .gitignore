@@ -32,14 +32,18 @@ frontend/dist/
 .eslintcache
 *.tsbuildinfo
 
-# Environment & Secret files
+# Environment & Secret files (Strictly ignored - secrets stay local/server only)
 .env
-.env.production
-.env.docker
-backend/.env
-frontend/.env
+.env.*
+*.env
+**/.env
+**/.env.*
+!.env.example
+!.env.docker.example
+!frontend/.env.example
 *.pem
 *.key
+*.cert
 certbot/
 
 # IDE & Editor
