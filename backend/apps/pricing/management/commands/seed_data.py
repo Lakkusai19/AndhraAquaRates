@@ -154,7 +154,8 @@ class Command(BaseCommand):
         admin_user.is_staff = True
         admin_user.is_superuser = True
         admin_user.email_verified = True
-        admin_user.set_password('Sai@7036114631')
+        admin_password = os.getenv('DJANGO_ADMIN_PASSWORD', 'AndhraAdmin@2026')
+        admin_user.set_password(admin_password)
         admin_user.save()
         self.stdout.write(f"[OK] Master Administrator account ready: lakkunagasai1144@gmail.com")
 
@@ -269,7 +270,8 @@ class Command(BaseCommand):
                 }
             )
             if u_created:
-                user.set_password('BuyerPassword123!')
+                buyer_password = os.getenv('DEMO_BUYER_PASSWORD', 'AndhraBuyer@2026')
+                user.set_password(buyer_password)
                 user.save()
 
             dist = District.objects.get(name=b_data['dist'], state=ap_state)

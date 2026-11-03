@@ -169,7 +169,8 @@ class Command(BaseCommand):
                 }
             )
             if not user.has_usable_password():
-                user.set_password('BuyerPass123!')
+                buyer_password = os.getenv('DEMO_BUYER_PASSWORD', 'AndhraBuyer@2026')
+                user.set_password(buyer_password)
                 user.save()
 
             buyer, _ = BuyerProfile.objects.get_or_create(
